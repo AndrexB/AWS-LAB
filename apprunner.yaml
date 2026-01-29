@@ -3,16 +3,20 @@ runtime: python311
 
 build:
   commands:
+    # Nella nuova build Python 3.11, la fase build serve solo per cose
+    # che generano file statici dentro /app. Le librerie vanno installate dopo.
     build:
-      - pip3 install --upgrade pip
-      - pip3 install pipenv
-      - pipenv install --deploy
+      - echo "Build phase placeholder"
 
 run:
   runtime-version: 3.11
+  # CRUCIALE: Installiamo le dipendenze qui, appena prima dell'avvio
   pre-run:
-    - pip3 install pipenv
-    - pipenv install --deploy
-  command: pipenv run python3 app.py
+    - pip3 install -r requirements.txt
+    
+  # Usiamo Gunicorn per servire l'app sulla porta 8080
+  command: gunicorn -w 4 -b 0.0.0.0:8080 app:app
+  
   network:
-    port: 8000
+    port: 8080
+    env: PORT
